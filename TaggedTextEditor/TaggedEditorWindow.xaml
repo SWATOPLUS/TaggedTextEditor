@@ -1,0 +1,75 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="TaggedTextEditor.TaggedEditorWindow"
+    x:Name="Window" Title="Untitled - Notepad" Height="600" Width="800" ResizeMode="CanResizeWithGrip" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/FileIcon.xaml" />
+                <ResourceDictionary Source="Resources/OpenIcon.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22" />
+            <RowDefinition />
+            <RowDefinition Height="20" />
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Column="0" Grid.Row="0" VerticalAlignment="Top">
+            <MenuItem Header="_File">
+                <MenuItem x:Name="NewMenu" Header="_New" ToolTip="Creates a new file" InputGestureText="CTRL+N" Click="MenuHandler_Click">
+                    <MenuItem.Icon>
+                        <Image Source="{StaticResource FileIcon}" Width="16" Height="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="OpenMenu" Header="_Open..." ToolTip="Opens a new file" InputGestureText="CTRL+O" Click="MenuHandler_Click">
+                    <MenuItem.Icon>
+                        <Image Source="{StaticResource OpenIcon}" Width="16" Height="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="SaveMenu" Header="_Save" ToolTip="Saves the current file" InputGestureText="CTRL+S" Click="MenuHandler_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/SaveIcon.png" Width="16" Height="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="SaveAsMenu" Header="Save _As" ToolTip="Saves the current file" Click="MenuHandler_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/SaveAsIcon.png" Width="16" Height="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem x:Name="ExitMenu" Header="E_xit" ToolTip="Exits the program" Click="MenuHandler_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command="Undo" />
+                <MenuItem Command="Redo" />
+                <Separator/>
+                <MenuItem Command="Cut" />
+                <MenuItem Command="Copy" />
+                <MenuItem Command="Paste" />
+                <Separator/>
+                <MenuItem Command="SelectAll" />
+            </MenuItem>
+            <MenuItem Header="_POS tagging">
+                <MenuItem x:Name="AutoTagMenu" Header="Auto tag sentences" ToolTip="Auto tag this text" Click="MenuHandler_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723" />
+
+        <StatusBar Grid.Column="0" Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusBar" Text="Ln 0, Col 0" />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

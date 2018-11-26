@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaggedTextEditor", "TaggedTextEditor\TaggedTextEditor.csproj", "{985BDD1D-DA84-4CF4-91ED-0198AC11CE2F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{985BDD1D-DA84-4CF4-91ED-0198AC11CE2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{985BDD1D-DA84-4CF4-91ED-0198AC11CE2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{985BDD1D-DA84-4CF4-91ED-0198AC11CE2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{985BDD1D-DA84-4CF4-91ED-0198AC11CE2F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3FA5C0C7-4FB4-4030-B25C-051376F73F8F}
+	EndGlobalSection
+EndGlobal
