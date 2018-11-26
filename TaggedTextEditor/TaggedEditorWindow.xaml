@@ -64,7 +64,30 @@
             </MenuItem>
         </Menu>
 
-        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723" />
+        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723">
+            <TextBox.ContextMenu>
+                <ContextMenu Opened="EditContextMenu_OnOpened">
+                    <MenuItem Header="_Edit">
+                        <MenuItem Command="Undo" />
+                        <MenuItem Command="Redo" />
+                        <Separator/>
+                        <MenuItem Command="Cut" />
+                        <MenuItem Command="Copy" />
+                        <MenuItem Command="Paste" />
+                        <Separator/>
+                        <MenuItem Command="SelectAll" />
+                    </MenuItem>
+                        <MenuItem x:Name="EditingWord" />
+                    <MenuItem Header="Verb">
+                        <MenuItem Header="Verb, past tense (VBD)" Tag="VBD" Click="TagMenuItem_OnClick"/>
+                        <MenuItem Header="Verb, gerund or present participle (VBG)" Tag="VBG" Click="TagMenuItem_OnClick"/>
+                        <MenuItem Header="Verb, past participle (VBN)" Tag="VBN" Click="TagMenuItem_OnClick"/>
+                        <MenuItem Header="Verb, non-3rd person singular present (VBP)" Tag="VBP" Click="TagMenuItem_OnClick"/>
+                        <MenuItem Header="Verb, 3rd person singular present (VBZ)" Tag="VBZ" Click="TagMenuItem_OnClick"/>
+                    </MenuItem>
+                </ContextMenu>
+            </TextBox.ContextMenu>
+        </TextBox>
 
         <StatusBar Grid.Column="0" Grid.Row="2">
             <StatusBarItem>

@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -145,6 +148,85 @@ namespace TaggedTextEditor
             var row = DocumentText.GetLineIndexFromCharacterIndex(caret);
             var col = caret - DocumentText.GetFirstVisibleLineIndex();
             StatusBar.Text = $"Ln {row}, Col {col}";
+        }
+
+        private void EditContextMenu_OnOpened(object sender, RoutedEventArgs e)
+        {
+            var caret = DocumentText.CaretIndex;
+            var oldText = DocumentText.Text;
+
+            var startPos = FindStartOfWord(oldText, caret);
+            var wordSize = FindEndOfWord(oldText, startPos);
+
+            EditingWord.Header = oldText.Substring(startPos, wordSize);
+        }
+
+        private void TagMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            var caret = DocumentText.CaretIndex;
+            var oldText = DocumentText.Text;
+
+            var startPos = FindStartOfWord(oldText, caret);
+            var wordSize = FindEndOfWord(oldText, startPos);
+
+            var parts = oldText.Substring(startPos, wordSize).Split('/');
+
+            var newWord = parts[0] + '/' + (sender as MenuItem)?.Tag;
+            var newText = oldText.Substring(0, startPos) + newWord + oldText.Substring(startPos + wordSize);
+            DocumentText.Text = newText;
+        }
+
+        private static int FindStartOfWord(string text, int caret)
+        {
+            var startPos = FindLast(text.Substring(0, caret), new[] { ", ", "\n" });
+
+            if (startPos == -1)
+            {
+                startPos = 0;
+            }
+            else
+            {
+                if (text[startPos] == '\n')
+                {
+                    startPos += 1;
+                }
+                else
+                {
+                    startPos += 2;
+                }
+            }
+
+            return startPos;
+        }
+
+        private static int FindEndOfWord(string text, int start)
+        {
+            var index = FindFirst(text.Substring(start), new[] {", ", "\n"});
+
+            if (index == -1)
+            {
+                return text.Length - start;
+            }
+
+            return index;
+        }
+
+        private static int FindFirst(string s, IEnumerable<string> subStrings)
+        {
+            return subStrings
+                .Select(x => s.IndexOf(x, StringComparison.Ordinal))
+                .Where(x => x != -1)
+                .DefaultIfEmpty(-1)
+                .Min();
+        }
+
+        private static int FindLast(string s, IEnumerable<string> subStrings)
+        {
+            return subStrings
+                .Select(x => s.LastIndexOf(x, StringComparison.Ordinal))
+                .Where(x => x != -1)
+                .DefaultIfEmpty(-1)
+                .Max();
         }
     }
 }
