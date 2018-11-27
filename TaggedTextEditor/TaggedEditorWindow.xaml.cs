@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace TaggedTextEditor
 {
@@ -15,10 +17,25 @@ namespace TaggedTextEditor
         private string _activeFilePath;
         private readonly WinkProvider _winkProvider;
 
+        private const string OtherGroupTag = "";
+        private readonly IDictionary<string, string> _tagsDictionary;
+        private readonly IDictionary<string, string> _tagsGroupDictionary = new Dictionary<string, string>()
+        {
+            {"VB", "Verb"},
+            {"NN", "Noun"},
+            {"JJ", "Adjective"},
+            {"RB", "Adverb"},
+            {OtherGroupTag, "Other"}
+        };
+
         public TaggedEditorWindow()
         {
             InitializeComponent();
             _winkProvider = new WinkProvider();
+            var tagsJson = File.ReadAllText("Database/tags.json");
+            var tagsDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(tagsJson);
+            _tagsDictionary = new ConcurrentDictionary<string, string>(tagsDict);
+            RebuildEditContextMenu();
         }
 
         private void AutoTag()
@@ -150,6 +167,55 @@ namespace TaggedTextEditor
             StatusBar.Text = $"Ln {row}, Col {col}";
         }
 
+        private void RebuildEditContextMenu()
+        {
+            var items = DocumentTextContextMenu.Items;
+            items.Clear();
+            items.Add(DefaultEditMenu);
+            items.Add(EditingWordMenu);
+
+            var grouping = _tagsDictionary.GroupBy(x => x.Key.Substring(0, 2)).ToDictionary(x=> x.Key);
+
+            var otherItems = new List<KeyValuePair<string, string>>();
+
+            foreach (var group in grouping)
+            {
+                if (_tagsGroupDictionary.ContainsKey(group.Key))
+                {
+                    items.Add(BuildEditContextMenuGroup(group.Key, group.Value));
+                }
+                else
+                {
+                    otherItems.AddRange(group.Value);
+                }
+            }
+
+            items.Add(BuildEditContextMenuGroup(OtherGroupTag, otherItems));
+        }
+
+        private MenuItem BuildEditContextMenuGroup(string nameTag, IEnumerable<KeyValuePair<string, string>> items)
+        {
+            var group = new MenuItem
+            {
+                Header = _tagsGroupDictionary[nameTag]
+            };
+
+            foreach (var x in items)
+            {
+                var item = new MenuItem
+                {
+                    Header = $"{x.Value} ({x.Key})",
+                    Tag = x.Key
+                };
+
+                item.Click += TagMenuItem_OnClick;
+
+                group.Items.Add(item);
+            }
+
+            return group;
+        }
+
         private void EditContextMenu_OnOpened(object sender, RoutedEventArgs e)
         {
             var caret = DocumentText.CaretIndex;
@@ -158,7 +224,7 @@ namespace TaggedTextEditor
             var startPos = FindStartOfWord(oldText, caret);
             var wordSize = FindEndOfWord(oldText, startPos);
 
-            EditingWord.Header = oldText.Substring(startPos, wordSize);
+            EditingWordMenu.Header = oldText.Substring(startPos, wordSize);
         }
 
         private void TagMenuItem_OnClick(object sender, RoutedEventArgs e)

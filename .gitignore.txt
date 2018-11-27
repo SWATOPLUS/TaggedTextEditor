@@ -1,6 +1,0 @@
-.vs/
-packages/
-**/bin/
-**/obj/
-*.user
-**/node_modules/
