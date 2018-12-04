@@ -102,6 +102,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TextConverter.cs" />
     <Compile Include="WinkProvider.cs" />
     <Compile Include="TaggedEditorWindow.xaml.cs">
       <DependentUpon>TaggedEditorWindow.xaml</DependentUpon>

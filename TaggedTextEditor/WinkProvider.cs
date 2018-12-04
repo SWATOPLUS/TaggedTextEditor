@@ -63,57 +63,5 @@ namespace TaggedTextEditor
                 .ToString()
                 .Split('\n');
         }
-
-        public string ConvertTextToDbo(string s)
-        {
-            var sentences = s.Split('\n')
-                .Select(ConvertSentenceToDbo);
-
-            return string.Join("", sentences);
-        }
-
-        private string ConvertSentenceToDbo(string s)
-        {
-            var words = new List<string>();
-
-            var sb = new StringBuilder();
-            var isWord = WordChars.Contains(s.First());
-
-            for (var i = 0; i < s.Length; i++)
-            {
-                var c = s[i];
-
-                if (c == ' ')
-                {
-                    
-                }
-            }
-
-
-            return string.Join(", ", words);
-        }
-
-        private string ConvertWordToDbo(string s)
-        {
-            if (s.Contains("_"))
-            {
-                var parts = s.Split(ViewWordDelimiter);
-
-                return $"{parts[0]}{DboWordDelimiter}{parts[1]}";
-            }
-
-            return $"{s}{DboWordDelimiter}{s}";
-        }
-
-        private const char DboWordDelimiter = '/';
-        private const char ViewWordDelimiter = '_';
-
-        private readonly HashSet<char> WordChars = new HashSet<char>(Enumerable.Range('A', 'Z' - 'A')
-            .Concat(Enumerable.Range('a', 'z' - 'a'))
-            .Concat(new[] {(int) ViewWordDelimiter})
-            .Select(x => (char) x));
-
-        private readonly HashSet<char> PunctuationChars = new HashSet<char>(new[] { '.', ',', '!', '?'});
-
     }
 }

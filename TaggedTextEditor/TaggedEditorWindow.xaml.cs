@@ -40,7 +40,8 @@ namespace TaggedTextEditor
 
         private void AutoTag()
         {
-            DocumentText.Text = _winkProvider.TagText(DocumentText.Text);
+            var taggedText = _winkProvider.TagText(DocumentText.Text);
+            DocumentText.Text = TextConverter.ConvertTextToView(taggedText);
         }
 
         private void New()
@@ -69,7 +70,8 @@ namespace TaggedTextEditor
 
                 using(var tr = new StreamReader(_activeFilePath))
                 {
-                    DocumentText.Text = tr.ReadToEnd();
+                    var text = tr.ReadToEnd();
+                    SetText(text);
                 }
 
                 UpdateTitle();
@@ -86,7 +88,7 @@ namespace TaggedTextEditor
             {
                 using (var tr = new StreamWriter(_activeFilePath))
                 {
-                    tr.Write(DocumentText.Text);
+                    tr.Write(GetText());
                 }
             }
         }
@@ -107,7 +109,7 @@ namespace TaggedTextEditor
                 _activeFilePath = dlg.FileName;
                 using (TextWriter tr = new StreamWriter(_activeFilePath))
                 {
-                    tr.Write(DocumentText.Text);
+                    tr.Write(GetText());
                 }
                 UpdateTitle();
             }
@@ -134,7 +136,7 @@ namespace TaggedTextEditor
                     Save();
                     break;
 
-                case "SaveAsTaggedMenu":
+                case "SaveAsMenu":
                     SaveAs();
                     break;
 
@@ -219,7 +221,7 @@ namespace TaggedTextEditor
         private void EditContextMenu_OnOpened(object sender, RoutedEventArgs e)
         {
             var caret = DocumentText.CaretIndex;
-            var oldText = DocumentText.Text;
+            var oldText = GetText();
 
             var startPos = FindStartOfWord(oldText, caret);
             var wordSize = FindEndOfWord(oldText, startPos);
@@ -230,7 +232,7 @@ namespace TaggedTextEditor
         private void TagMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             var caret = DocumentText.CaretIndex;
-            var oldText = DocumentText.Text;
+            var oldText = GetText();
 
             var startPos = FindStartOfWord(oldText, caret);
             var wordSize = FindEndOfWord(oldText, startPos);
@@ -239,7 +241,29 @@ namespace TaggedTextEditor
 
             var newWord = parts[0] + '/' + (sender as MenuItem)?.Tag;
             var newText = oldText.Substring(0, startPos) + newWord + oldText.Substring(startPos + wordSize);
-            DocumentText.Text = newText;
+            SetText(newText);
+        }
+
+        private void SetText(string s)
+        {
+            if (s.Split(new[] {", "}, StringSplitOptions.None).First().Contains("/"))
+            {
+                s = TextConverter.ConvertTextToView(s);
+            }
+
+            DocumentText.Text = s;
+        }
+
+        private string GetText()
+        {
+            var text = DocumentText.Text;
+
+            if (text.Contains("_"))
+            {
+                text = TextConverter.ConvertTextToDbo(text);
+            }
+
+            return text;
         }
 
         private static int FindStartOfWord(string text, int caret)
