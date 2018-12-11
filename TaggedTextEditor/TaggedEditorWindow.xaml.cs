@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -221,25 +222,27 @@ namespace TaggedTextEditor
         private void EditContextMenu_OnOpened(object sender, RoutedEventArgs e)
         {
             var caret = DocumentText.CaretIndex;
-            var oldText = GetText();
+            var oldText = DocumentText.Text;
 
             var startPos = FindStartOfWord(oldText, caret);
             var wordSize = FindEndOfWord(oldText, startPos);
 
-            EditingWordMenu.Header = oldText.Substring(startPos, wordSize);
+            var word = oldText.Substring(startPos, wordSize);
+
+            EditingWordMenu.Header = word.Replace("_", "__");
         }
 
         private void TagMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             var caret = DocumentText.CaretIndex;
-            var oldText = GetText();
+            var oldText = DocumentText.Text;
 
             var startPos = FindStartOfWord(oldText, caret);
             var wordSize = FindEndOfWord(oldText, startPos);
 
-            var parts = oldText.Substring(startPos, wordSize).Split('/');
+            var parts = oldText.Substring(startPos, wordSize).Split('_');
 
-            var newWord = parts[0] + '/' + (sender as MenuItem)?.Tag;
+            var newWord = parts[0] + '_' + (sender as MenuItem)?.Tag;
             var newText = oldText.Substring(0, startPos) + newWord + oldText.Substring(startPos + wordSize);
             SetText(newText);
         }
@@ -268,7 +271,7 @@ namespace TaggedTextEditor
 
         private static int FindStartOfWord(string text, int caret)
         {
-            var startPos = FindLast(text.Substring(0, caret), new[] { ", ", "\n" });
+            var startPos = FindLast(text.Substring(0, caret), new[] { " ", "\n" });
 
             if (startPos == -1)
             {
@@ -276,14 +279,7 @@ namespace TaggedTextEditor
             }
             else
             {
-                if (text[startPos] == '\n')
-                {
-                    startPos += 1;
-                }
-                else
-                {
-                    startPos += 2;
-                }
+                startPos += 1;
             }
 
             return startPos;
@@ -291,7 +287,7 @@ namespace TaggedTextEditor
 
         private static int FindEndOfWord(string text, int start)
         {
-            var index = FindFirst(text.Substring(start), new[] {", ", "\n"});
+            var index = FindFirst(text.Substring(start), new[] {" ", "\n"});
 
             if (index == -1)
             {
