@@ -64,7 +64,7 @@
             </MenuItem>
         </Menu>
 
-        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723">
+        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723" TextWrapping="Wrap">
             <TextBox.ContextMenu>
                 <ContextMenu x:Name="DocumentTextContextMenu"  Opened="EditContextMenu_OnOpened">
                     <MenuItem x:Name="DefaultEditMenu" Header="_Edit">

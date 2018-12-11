@@ -12,43 +12,21 @@ namespace TaggedTextEditor
             var sentences = s.Split('\n')
                 .Select(ConvertSentenceToDbo);
 
-            return string.Join("", sentences);
+            return string.Join("\n", sentences);
         }
 
         private static string ConvertSentenceToDbo(string s)
         {
-            var words = new List<string>();
-            var sb = new StringBuilder();
+            var words = s.Split(' ')
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(ConvertWordToDbo);
 
-            foreach (var c in s)
-            {
-                if (c == ' ' || PunctuationChars.Contains(c))
-                {
-                    var word = sb.ToString().Trim();
-                    sb.Clear();
-
-                    if (word != string.Empty)
-                    {
-                        words.Add(word);
-                    }
-
-                    if (c != ' ')
-                    {
-                        words.Add(c.ToString());
-                    }
-                }
-                else
-                {
-                    sb.Append(c);
-                }
-            }
-        
-            return string.Join(", ", words.Where(x => !string.IsNullOrWhiteSpace(x)).Select(ConvertWordToDbo));
+            return string.Join(", ", words);
         }
 
         private static string ConvertWordToDbo(string s)
         {
-            if (s.Contains("_"))
+            if (s.Contains(ViewWordDelimiter))
             {
                 var parts = s.Split(ViewWordDelimiter);
 
@@ -64,32 +42,27 @@ namespace TaggedTextEditor
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(ConvertSentenceToView);
 
-            return string.Join("", sentences);
+            return string.Join("\n", sentences);
         }
 
         private static string ConvertSentenceToView(string s)
         {
-            var sentences = s.Split(new[] { ", " }, StringSplitOptions.None)
+            var words = s.Split(new[] { ", " }, StringSplitOptions.None)
                 .Select(ConvertWordToView);
 
-            return string.Join(" ", sentences);
+            return string.Join(" ", words);
         }
 
         private static string ConvertWordToView(string s)
         {
-            var parts = s.Split(DboWordDelimiter);
-
-            if (parts[0].Length == 1)
+            if (s.Contains(DboWordDelimiter))
             {
-                var c = parts[0].First();
+                var parts = s.Split(DboWordDelimiter);
 
-                if (PunctuationChars.Contains(c))
-                {
-                    return $"{c}";
-                }
+                return $"{parts[0]}{ViewWordDelimiter}{parts[1]}";
             }
 
-            return $"{parts[0]}{ViewWordDelimiter}{parts[1]}";
+            return s;
         }
 
         private const char DboWordDelimiter = '/';
