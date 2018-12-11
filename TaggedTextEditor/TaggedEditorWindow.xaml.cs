@@ -3,10 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -38,16 +39,35 @@ namespace TaggedTextEditor
             _tagsDictionary = new ConcurrentDictionary<string, string>(tagsDict);
             RebuildEditContextMenu();
         }
-
+        
         private void AutoTag()
         {
-            var taggedText = _winkProvider.TagText(DocumentText.Text);
-            DocumentText.Text = TextConverter.ConvertTextToView(taggedText);
+            var text = GetText();
+            var taggedText = _winkProvider.TagText(text);
+            var viewText = TextConverter.ConvertTextToView(taggedText);
+
+            DocumentText.Document = GetDocument(viewText);
+        }
+
+        private static FlowDocument GetDocument(string viewText)
+        {
+            var lines = viewText.Split('\n');
+
+            var doc = new FlowDocument();
+
+            foreach (var line in lines)
+            {
+                var p = new Paragraph();
+                p.Inlines.AddRange(BuildInlineItems(line));
+                doc.Blocks.Add(p);
+            }
+
+            return doc;
         }
 
         private void New()
         {
-            DocumentText.Text = "";
+            DocumentText.Document = new FlowDocument();
             _activeFileName = "Untitled";
             _activeFilePath = null;
             UpdateTitle();
@@ -164,10 +184,10 @@ namespace TaggedTextEditor
 
         private void UpdateStatus()
         {
-            var caret = DocumentText.CaretIndex;
-            var row = DocumentText.GetLineIndexFromCharacterIndex(caret);
-            var col = caret - DocumentText.GetFirstVisibleLineIndex();
-            StatusBar.Text = $"Ln {row}, Col {col}";
+            //var caret = DocumentText.CaretIndex;
+            //var row = DocumentText.GetLineIndexFromCharacterIndex(caret);
+            //var col = caret - DocumentText.GetFirstVisibleLineIndex();
+            //StatusBar.Text = $"Ln {row}, Col {col}";
         }
 
         private void RebuildEditContextMenu()
@@ -221,10 +241,23 @@ namespace TaggedTextEditor
 
         private void EditContextMenu_OnOpened(object sender, RoutedEventArgs e)
         {
-            var caret = DocumentText.CaretIndex;
-            var oldText = DocumentText.Text;
+            var caret = DocumentText.CaretPosition;
+            var caretPos = caret.GetTextRunLength(LogicalDirection.Backward);
+            var block = DocumentText.CaretPosition.Paragraph ?? new Paragraph();
+            var oldText = new TextRange(block.ContentStart, block.ContentEnd).Text;
+            
+            foreach (var inline in block.Inlines)
+            {
+                if (inline.ContentStart.GetOffsetToPosition(caret) >= 0
+                    && inline.ContentEnd.GetOffsetToPosition(caret) <= 0)
+                {
+                    break;
+                }
 
-            var startPos = FindStartOfWord(oldText, caret);
+                caretPos += inline.ContentStart.GetOffsetToPosition(inline.ContentEnd);
+            }
+
+            var startPos = FindStartOfWord(oldText, caretPos);
             var wordSize = FindEndOfWord(oldText, startPos);
 
             var word = oldText.Substring(startPos, wordSize);
@@ -234,17 +267,60 @@ namespace TaggedTextEditor
 
         private void TagMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            var caret = DocumentText.CaretIndex;
-            var oldText = DocumentText.Text;
+            var caret = DocumentText.CaretPosition;
+            var caretPos = caret.GetTextRunLength(LogicalDirection.Backward);
+            var block = DocumentText.CaretPosition.Paragraph ?? new Paragraph();
+            var oldText = new TextRange(block.ContentStart, block.ContentEnd).Text;
 
-            var startPos = FindStartOfWord(oldText, caret);
+            foreach (var inline in block.Inlines)
+            {
+                if (inline.ContentStart.GetOffsetToPosition(caret) >= 0
+                    && inline.ContentEnd.GetOffsetToPosition(caret) <= 0)
+                {
+                    break;
+                }
+
+                caretPos += inline.ContentStart.GetOffsetToPosition(inline.ContentEnd);
+            }
+
+            var startPos = FindStartOfWord(oldText, caretPos);
             var wordSize = FindEndOfWord(oldText, startPos);
 
             var parts = oldText.Substring(startPos, wordSize).Split('_');
 
             var newWord = parts[0] + '_' + (sender as MenuItem)?.Tag;
             var newText = oldText.Substring(0, startPos) + newWord + oldText.Substring(startPos + wordSize);
-            SetText(newText);
+            block.Inlines.Clear();
+            block.Inlines.AddRange(BuildInlineItems(newText));
+        }
+
+        private static IEnumerable<Inline> BuildInlineItems(string sentence)
+        {
+            var list = new List<Inline>();
+
+            var words = sentence.Split(' ');
+
+            foreach (var word in words)
+            {
+                if (word.Contains("_"))
+                {
+                    var parts = word.Split('_');
+
+                    list.Add(new Run(parts[0]));
+                    list.Add(new Run("_"));
+                    var tag = new Run(parts[1]) {Foreground = Brushes.Blue};
+
+                    list.Add(tag);
+                }
+                else
+                {
+                    list.Add(new Run(word));
+                }
+
+                list.Add(new Run(" "));
+            }
+
+            return list;
         }
 
         private void SetText(string s)
@@ -254,12 +330,13 @@ namespace TaggedTextEditor
                 s = TextConverter.ConvertTextToView(s);
             }
 
-            DocumentText.Text = s;
+            DocumentText.Document = GetDocument(s);
         }
 
         private string GetText()
         {
-            var text = DocumentText.Text;
+            var document = DocumentText.Document;
+            var text = new TextRange(document.ContentStart, document.ContentEnd).Text;
 
             if (text.Contains("_"))
             {

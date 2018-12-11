@@ -64,8 +64,8 @@
             </MenuItem>
         </Menu>
 
-        <TextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723" TextWrapping="Wrap">
-            <TextBox.ContextMenu>
+        <RichTextBox x:Name="DocumentText" Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" KeyDown="DocumentText_KeyDown" IsKeyboardFocusWithinChanged="DocumentText_IsKeyboardFocusWithinChanged" AcceptsReturn="True" AcceptsTab="True" Margin="0,-0.723,0,0.723">
+            <RichTextBox.ContextMenu>
                 <ContextMenu x:Name="DocumentTextContextMenu"  Opened="EditContextMenu_OnOpened">
                     <MenuItem x:Name="DefaultEditMenu" Header="_Edit">
                         <MenuItem Command="Undo" />
@@ -79,8 +79,8 @@
                     </MenuItem>
                     <MenuItem x:Name="EditingWordMenu" />
                 </ContextMenu>
-            </TextBox.ContextMenu>
-        </TextBox>
+            </RichTextBox.ContextMenu>
+        </RichTextBox>
 
         <StatusBar Grid.Column="0" Grid.Row="2">
             <StatusBarItem>
